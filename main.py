@@ -20,3 +20,7 @@ def create_book(book: Book):
     next_id +=1
     return book_data
 
+@app.get("/books")
+def list_books():
+    return list(books_db.values())
+
