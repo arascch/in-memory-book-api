@@ -30,3 +30,9 @@ def get_book(book_id:int):
         raise HTTPException(status_code=404 , detail="book not found")
     return books_db[book_id]
 
+@app.delete("/books/{book_id}" , status_code=status.HTTP_204_NO_CONTENT)
+def delete_book(book_id:int):
+    if book_id not in books_db:
+        raise HTTPException(status_code=404 , detail="book not found")
+    del books_db[book_id]
+    return None
