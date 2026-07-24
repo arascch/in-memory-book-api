@@ -24,3 +24,9 @@ def create_book(book: Book):
 def list_books():
     return list(books_db.values())
 
+@app.get("/books/{book_id}")
+def get_book(book_id:int):
+    if book_id not in books_db:
+        raise HTTPException(status_code=404 , detail="book not found")
+    return books_db[book_id]
+
