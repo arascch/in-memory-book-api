@@ -1,12 +1,15 @@
 from fastapi import FastAPI , HTTPException,status,Depends
 from pydantic import BaseModel
+from sqlmodel import SQLModel, Field
 
 app = FastAPI()
 
-class Book(BaseModel):
-    title:str
+class Book(SQLModel , table=True):
+    id : int | None = Field(default=None , primary_key=True)
+    title : str
     author : str
     price : float
+
 
 books_db:dict[int,dict]={}
 next_id = 1
