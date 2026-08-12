@@ -53,7 +53,7 @@ def create_book(book_data: BookCreate , session: Session=Depends(get_session)):
 
 @app.get("/books")
 def list_books():
-    return list(books_db.values())
+    
 
 @app.get("/books/{book_id}")
 def get_book(book:dict = Depends(get_book_or_404)):
