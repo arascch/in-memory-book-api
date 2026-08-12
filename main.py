@@ -28,19 +28,20 @@ class BookCreate(SQLModel):
     author: str
     price: float
 
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 books_db:dict[int,dict]={}
 next_id = 1
 
-def get_book_or_404(book_id:int):
-    if book_id not in books_db:
+def get_book_or_404(book_id:int , session: Session= Depends(get_session)):
+    book = session.get(Book , book_id)
+    if book is None:
         raise HTTPException(status_code=404,detail="book not found")
-    return books_db[book_id
-                    ]
+    return book
 
-def get_session():
-    with Session(engine) as session:
-        yield session
+
 
 
 @app.post("/books" , status_code=status.HTTP_201_CREATED)
@@ -57,13 +58,14 @@ def list_books(session : Session = Depends(get_session)):
     return books
 
 @app.get("/books/{book_id}")
-def get_book(book:dict = Depends(get_book_or_404)):
+def get_book(book:Book = Depends(get_book_or_404)):
     return book
     
 
 @app.delete("/books/{book_id}" , status_code=status.HTTP_204_NO_CONTENT)
-def delete_book(book_id: int,book:dict = Depends(get_book_or_404)):
-    del books_db[book_id]
+def delete_book(book: Book,session: Session = Depends(get_session)):
+    session.delete(book)
+    session.commit()
     return None
 
 
