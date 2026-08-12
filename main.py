@@ -2,7 +2,7 @@ from fastapi import FastAPI , HTTPException,status,Depends
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Field  , create_engine , Session , select
 from contextlib import asynccontextmanager
-
+from passlib.context import CryptContext
 
 sqlite_file_name = "bookstore.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -27,6 +27,20 @@ class BookCreate(SQLModel):
     title: str
     author: str
     price: float
+
+class User(SQLModel,table = True):
+    id : int| None = Field(default=None , primary_key=True)
+    username: str
+    hashed_password: str
+
+
+pwd_context = CryptContext(schemes=["bcrypt"] , deprecated = "auto")
+
+def hash_password(password: str)-> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password , hashed_password)
 
 def get_session():
     with Session(engine) as session:
