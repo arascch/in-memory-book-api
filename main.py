@@ -11,7 +11,9 @@ engine = create_engine(sqlite_url)
 @asynccontextmanager
 async def lifespan(app:FastAPI):
     SQLModel.metadata.create_all(engine)
+    print("Server has been Started ...")
     yield
+    print("Server is Shutting down ...")
     
 app = FastAPI(lifespan=lifespan)
 
