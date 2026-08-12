@@ -1,13 +1,19 @@
 from fastapi import FastAPI , HTTPException,status,Depends
 from pydantic import BaseModel
 from sqlmodel import SQLModel, Field  , create_engine
+from contextlib import asynccontextmanager
+
 
 sqlite_file_name = "bookstore.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 engine = create_engine(sqlite_url)
-
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    SQLModel.metadata.create_all(engine)
+    yield
+    
+app = FastAPI(lifespan=lifespan)
 
 class Book(SQLModel , table=True):
     id : int | None = Field(default=None , primary_key=True)
@@ -24,6 +30,10 @@ def get_book_or_404(book_id:int):
         raise HTTPException(status_code=404,detail="book not found")
     return books_db[book_id
                     ]
+
+
+
+
 @app.post("/books" , status_code=status.HTTP_201_CREATED)
 def create_book(book: Book):
     global next_id
