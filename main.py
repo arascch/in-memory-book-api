@@ -1,6 +1,11 @@
 from fastapi import FastAPI , HTTPException,status,Depends
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field  , create_engine
+
+sqlite_file_name = "bookstore.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+
+engine = create_engine(sqlite_url)
 
 app = FastAPI()
 
