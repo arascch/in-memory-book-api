@@ -52,8 +52,9 @@ def create_book(book_data: BookCreate , session: Session=Depends(get_session)):
     return book
 
 @app.get("/books")
-def list_books():
-    
+def list_books(session : Session = Depends(get_session)):
+    books = session.exec(select(Book)).all()
+    return books
 
 @app.get("/books/{book_id}")
 def get_book(book:dict = Depends(get_book_or_404)):
