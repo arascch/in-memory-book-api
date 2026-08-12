@@ -1,6 +1,6 @@
 from fastapi import FastAPI , HTTPException,status,Depends
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field  , create_engine
+from sqlmodel import SQLModel, Field  , create_engine , Session , select
 from contextlib import asynccontextmanager
 
 
@@ -23,6 +23,11 @@ class Book(SQLModel , table=True):
     author : str
     price : float
 
+class BookCreate(SQLModel):
+    title: str
+    author: str
+    price: float
+
 
 books_db:dict[int,dict]={}
 next_id = 1
@@ -33,17 +38,18 @@ def get_book_or_404(book_id:int):
     return books_db[book_id
                     ]
 
-
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 
 @app.post("/books" , status_code=status.HTTP_201_CREATED)
-def create_book(book: Book):
-    global next_id
-    book_data = book.dict()
-    book_data["id"]=next_id
-    books_db[next_id] = book_data
-    next_id +=1
-    return book_data
+def create_book(book_data: BookCreate , session: Session=Depends(get_session)):
+    book = Book(**book_data.dict())
+    session.add(book)
+    session.commit()
+    session.refresh(book)
+    return book
 
 @app.get("/books")
 def list_books():
