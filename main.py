@@ -33,6 +33,9 @@ class User(SQLModel,table = True):
     username: str
     hashed_password: str
 
+class UserCreate(SQLModel):
+    username: str
+    password: str
 
 pwd_context = CryptContext(schemes=["bcrypt"] , deprecated = "auto")
 
@@ -82,6 +85,6 @@ def delete_book(book: Book,session: Session = Depends(get_session)):
     session.commit()
     return None
 
-
-#next chapter is about async 
-
+@app.post("/register", status_code = status.HTTP_201_CREATED)
+def register(user_data:UserCreate , session:Session=Depends(get_session)):
+    
