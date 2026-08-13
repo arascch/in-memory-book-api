@@ -87,4 +87,12 @@ def delete_book(book: Book,session: Session = Depends(get_session)):
 
 @app.post("/register", status_code = status.HTTP_201_CREATED)
 def register(user_data:UserCreate , session:Session=Depends(get_session)):
-    
+    existing = session.exec(select(User).where(User.username == user_data.username)).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="username already taken")
+
+    user = User(username=user_data.username , hashed_password=hash_password(user_data.password))
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return{"id":user.id , "username":user.username}
