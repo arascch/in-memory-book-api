@@ -3,6 +3,20 @@ from pydantic import BaseModel
 from sqlmodel import SQLModel, Field  , create_engine , Session , select
 from contextlib import asynccontextmanager
 from passlib.context import CryptContext
+from jose import jwt
+from datetime import datetime, timedelta,timezone
+
+
+SECRET_KEY = ""
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+def create_access_token(data:dict)->str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY , algorithm=ALGORITHM)
+
 
 sqlite_file_name = "bookstore.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
