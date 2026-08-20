@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta,timezone
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 SECRET_KEY = ""
@@ -72,7 +73,15 @@ def get_book_or_404(book_id:int , session: Session= Depends(get_session)):
         raise HTTPException(status_code=404,detail="book not found")
     return book
 
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends() , session:Session=Depends(get_session)):
+    user = session.exec(select(User).where(User.username == form_data.username))
+    if not user or not verify_password(form_data.password , user.hashed_password):
+        raise HTTPException(status_code=401, detail="incorrect username or password")
 
+
+    token = create_access_token(data={"sub": user.username})
+    return {"access_token":token , "token_type":"bearer"}
 
 
 @app.post("/books" , status_code=status.HTTP_201_CREATED)
