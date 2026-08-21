@@ -5,12 +5,14 @@ from contextlib import asynccontextmanager
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta,timezone
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
+
 
 
 SECRET_KEY = ""
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def create_access_token(data:dict)->str:
     to_encode = data.copy()
@@ -75,8 +77,8 @@ def get_book_or_404(book_id:int , session: Session= Depends(get_session)):
 
 @app.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends() , session:Session=Depends(get_session)):
-    user = session.exec(select(User).where(User.username == form_data.username))
-    if not user or not verify_password(form_data.password , user.hashed_password):
+    user = session.exec(select(User).where(User.username == form_data.username)).first()
+    if not user or not verify_password(form_data.password , user.hashed_password ):
         raise HTTPException(status_code=401, detail="incorrect username or password")
 
 
