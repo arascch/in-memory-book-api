@@ -108,7 +108,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends() , session:Session=Dep
 
 
 @app.post("/books" , status_code=status.HTTP_201_CREATED)
-def create_book(book_data: BookCreate , session: Session=Depends(get_session)):
+def create_book(book_data: BookCreate , session: Session=Depends(get_session), current_user: User=Depends(get_current_user),):
     book = Book(**book_data.dict())
     session.add(book)
     session.commit()
